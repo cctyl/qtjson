@@ -9,14 +9,18 @@
 #include <QStringList>
 #include<QJsonArray>
 #include<vector>
+#include<map>
 #include<QDebug>
 
 
+namespace qtjson {
 // ============================================================================
 template <class T>
 struct special_traits {
     static constexpr bool value = false;
 };
+
+
 
 template <class T, std::enable_if_t<!reflect::has_member<T>() && !special_traits<T>::value, int> = 0>
 QJsonValue objToJson(T const &object) {
@@ -24,7 +28,7 @@ QJsonValue objToJson(T const &object) {
 }
 
 template <class T, std::enable_if_t<!reflect::has_member<T>() && special_traits<T>::value, int> = 0>
-QJsonObject objToJson(T const &object) {
+QJsonValue objToJson(T const &object) {
     return special_traits<T>::objToJson(object);
 }
 
@@ -106,7 +110,7 @@ T jsonToObj(QJsonValue const &root) {
 }
 
 template <class T, std::enable_if_t<reflect::has_member<T>(), int> = 0>
-T jsonToObj(QJsonObject const &root) {
+T jsonToObj(QJsonValue const &root) {
     T object;
     reflect::foreach_member(object, [&](const char *key, auto &value) {
         value = jsonToObj<std::decay_t<decltype(value)>>(root[key]);
@@ -116,6 +120,10 @@ T jsonToObj(QJsonObject const &root) {
 
 
 // =====================================================================
+
+
+
+
 /**
  * QJsonObject -> QString
  * @brief jsonToStr
@@ -132,13 +140,33 @@ inline QString jsonToStr(QJsonObject obj) {
     // 将 QByteArray 转换为 QString
     return QString::fromUtf8(jsonData);
 }
+
+inline QString jsonToStr(QJsonArray array) {
+
+    // 创建一个 QJsonDocument，并将 QJsonArray 设置为其根节点
+    QJsonDocument doc(array);
+
+    // 将 QJsonDocument 转换为 QByteArray
+    QByteArray jsonData = doc.toJson(QJsonDocument::Indented); // 使用 Indented 格式化输出
+
+    // 将 QByteArray 转换为 QString
+    return QString::fromUtf8(jsonData);
+}
+inline QString jsonToStr(QJsonValue value) {
+    if(value.isObject()){
+
+        return jsonToStr(value.toObject());
+    }else {
+        return jsonToStr(value.toArray());
+    }
+}
 /**
  * QString -> QJsonObject
  * @brief strToJson
  * @param jsonString
  * @return
  */
-inline QJsonObject strToJson(QString const &jsonString) {
+inline QJsonValue strToJson(QString const &jsonString) {
     QJsonParseError parseError;
     QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonString.toUtf8(), &parseError);
 
@@ -148,36 +176,48 @@ inline QJsonObject strToJson(QString const &jsonString) {
         return QJsonObject();
     }
 
-    // 获取 QJsonObject
-    QJsonObject jsonObject = jsonDoc.object();
-    return jsonObject;
+    if(jsonDoc.isObject()){
+        // 获取 QJsonObject
+        return jsonDoc.object();
+    }else if(jsonDoc.isArray()){
+
+        return jsonDoc.array();
+    }else{
+        return QJsonValue();
+    }
+
 }
 
 
 // ==============================================================
 //自定义特化扩展
 
+template <class T, class Alloc>
+struct special_traits<std::vector<T, Alloc>> {
+    static constexpr bool value = true;
 
-// template <class T, class Alloc>
-// struct special_traits<std::vector<T, Alloc>> {
-//     static constexpr bool value = true;
+    static QJsonValue objToJson(std::vector<T, Alloc> const &object) {
+        QJsonArray root;
+        for (auto const &elem: object) {
 
-//     static QJsonArray objToJson(std::vector<T, Alloc> const &object) {
-//         QJsonObject root;
-//         for (auto const &elem: object) {
-//             root.append(reflect_json::objToJson(elem));
-//         }
-//         return root;
-//     }
+            qDebug()<< elem;
+             qDebug()<<  qtjson::objToJson(elem);
+            root.append(qtjson::objToJson(elem));
+        }
 
-//     static std::vector<T, Alloc> jsonToObj(Json::Value const &root) {
-//         std::vector<T, Alloc> object;
-//         for (auto const &elem: root) {
-//             object.push_back(reflect_json::jsonToObj<T>(elem));
-//         }
-//         return object;
-//     }
-// };
+        qDebug()<<root;
+        return root;
+    }
+
+    static std::vector<T, Alloc> jsonToObj(QJsonValue const &root) {
+        std::vector<T, Alloc> object;
+        for (auto const &elem : root.toArray()) {
+            object.push_back(qtjson::jsonToObj<T>(elem));
+        }
+        return object;
+    }
+};
+
 
 // template <class K, class V, class Alloc>
 // struct special_traits<std::map<K, V, Alloc>> {
@@ -201,6 +241,6 @@ inline QJsonObject strToJson(QString const &jsonString) {
 // };
 
 
-
+}
 
 #endif // QTJSON_H

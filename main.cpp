@@ -17,10 +17,10 @@ public:
     REFLECT(m_type,m_platform,m_release,m_hostname,m_arch,m_uptime);
 };
 
+//自定义类型
+void testCustom(){
 
-void test(){
-
-
+    using namespace qtjson;
     //对象转换QJsonObject
     OsInfo * osInfo = new OsInfo();
     osInfo->m_platform ="平台";
@@ -45,7 +45,18 @@ void test(){
 
     //对象转json字符串
     QString jsonStr =jsonToStr( objToJson(*osInfo));
-    qDebug()<<jsonStr;
+    /*
+        {
+            "m_arch": "x86",
+            "m_hostname": "lenovo",
+            "m_platform": "平台",
+            "m_release": "win10212H",
+            "m_type": "Windows",
+            "m_uptime": 12.6
+        }
+     */
+
+    qDebug()<<jsonStr.toUtf8().data();
 
     //json字符串转对象
     OsInfo o2 =   jsonToObj<OsInfo>(strToJson(jsonStr));
@@ -69,12 +80,38 @@ void test(){
 
     qDebug()<< jsonObject["numbers"] ;
 }
+
+//测试 std::vector
+void testVector(){
+    using namespace qtjson;
+
+
+    //序列化
+    std::vector<int> v= {
+        1,2,3,4,5,6,8
+    };
+    QString jsonStr = jsonToStr( objToJson(v));
+    qDebug()<<jsonStr.toUtf8().data();
+
+
+    //反序列化
+    std::vector<int> v2=   jsonToObj< std::vector<int>>( strToJson(jsonStr));
+    qDebug()<<"v2.size="<< v2.size();
+    for(auto & elem : v2){
+        qDebug()<<"反序列化:"<<elem;
+    }
+    qDebug()<<"反序列化结束";
+}
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
 
-    test();
+    testCustom();
+    // testVector();
+
+
 
     return a.exec();
 }
