@@ -14,7 +14,9 @@
 
 
 namespace qtjson {
-// ============================================================================
+
+
+// 1.===========================对象与json对象的转换=================================================
 template <class T>
 struct special_traits {
     static constexpr bool value = false;
@@ -119,9 +121,7 @@ T jsonToObj(QJsonValue const &root) {
 }
 
 
-// =====================================================================
-
-
+// 2.============================字符串与json对象的转换=========================================
 
 
 /**
@@ -189,8 +189,8 @@ inline QJsonValue strToJson(QString const &jsonString) {
 }
 
 
-// ==============================================================
-//自定义特化扩展
+// 3.==================自定义特化扩展============================================
+
 
 template <class T, class Alloc>
 struct special_traits<std::vector<T, Alloc>> {
@@ -201,7 +201,7 @@ struct special_traits<std::vector<T, Alloc>> {
         for (auto const &elem: object) {
 
             qDebug()<< elem;
-             qDebug()<<  qtjson::objToJson(elem);
+            qDebug()<<  qtjson::objToJson(elem);
             root.append(qtjson::objToJson(elem));
         }
 
@@ -219,26 +219,31 @@ struct special_traits<std::vector<T, Alloc>> {
 };
 
 
-// template <class K, class V, class Alloc>
-// struct special_traits<std::map<K, V, Alloc>> {
-//     static constexpr bool value = true;
+template <class K, class V, class Alloc>
+struct special_traits<std::map<K, V, Alloc>> {
+    static constexpr bool value = true;
 
-//     static Json::Value objToJson(std::map<K, V, Alloc> const &object) {
-//         Json::Value root;
-//         for (auto const &elem: object) {
-//             root[elem.first] = reflect_json::objToJson(elem.second);
-//         }
-//         return root;
-//     }
+    static QJsonValue objToJson(std::map<K, V, Alloc> const &object) {
+        QJsonObject root;
+        for (auto const &elem: object) {
+            root[elem.first] = qtjson::objToJson(elem.second);
+        }
+        return root;
+    }
 
-//     static std::map<K, V, Alloc> jsonToObj(Json::Value const &root) {
-//         std::map<K, V, Alloc> object;
-//         for (auto const &key: root.getMemberNames()) {
-//             object[key] = reflect_json::jsonToObj<V>(root[key]);
-//         }
-//         return object;
-//     }
-// };
+    static std::map<K, V, Alloc> jsonToObj(QJsonValue const &root) {
+        std::map<K, V, Alloc> object;
+         QJsonObject  jsonObject = root.toObject();
+
+        for (auto it = jsonObject.begin(); it != jsonObject.end(); ++it) {
+            const QString &key = it.key();
+            const QJsonValue &value = it.value();
+            object[key] = qtjson::jsonToObj<V>(root[key]);
+
+        }
+        return object;
+    }
+};
 
 
 }

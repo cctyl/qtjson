@@ -103,14 +103,37 @@ void testVector(){
     qDebug()<<"反序列化结束";
 }
 
+
+void testMap(){
+    using namespace qtjson;
+
+    std::map<QString,int> m={
+
+        {"zhangsan",20},
+        {"lisi",15}
+    };
+    QString jsonStr = jsonToStr( objToJson(m));
+    qDebug()<<jsonStr.toUtf8().data();
+
+
+    std::map<QString,int> m2=   jsonToObj< std::map<QString,int>>( strToJson(jsonStr));
+    qDebug()<<m2.size();
+    for (auto p : m2) {
+       qDebug()<< "key=" << p.first << ",value=" << p.second;
+    }
+
+
+
+}
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
 
-    testCustom();
+    // testCustom();
     // testVector();
-
+    testMap();
 
 
     return a.exec();
