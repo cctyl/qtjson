@@ -1,0 +1,61 @@
+<html>
+	<h1>自动生成qtjson注册文本</h1>
+	<p>将类成员类型以及成员名直接复制到输入框，点击转换，输出注册文本：REFLECT(a,b,c)</p>
+	<div >
+		输入：<textarea id="inputStr"  rows="20" cols="100" placeholder="    double totalGb;
+    double usedGb;
+    double   freeGb ;
+    double usedPercentage;
+    double freePercentage;"></textarea>
+		<button id="trans" onclick="transfer()">转换</button>
+	</div>
+	
+	<div>
+		输出：<textarea id="outputStr"  rows="10" cols="100" placeholder="REFLECT(totalGb,usedGb,usedPercentage,freePercentage)"></textarea>
+	</div>
+	
+	
+<script >
+
+
+let inputTextarea = document.getElementById("inputStr");
+let outputTextarea = document.getElementById("outputStr");
+
+function extractVariableNames(str) {
+    // 正则表达式用于匹配变量名
+    const regex = /(\w+);/g;
+    let match;
+    let variableNames = [];
+
+    // 使用正则表达式匹配每一行中的变量名
+    while ((match = regex.exec(str)) !== null) {
+        // 提取变量名并添加到数组中
+        variableNames.push(match[1]);
+    }
+
+    // 将变量名数组转换为逗号分隔的字符串
+    return variableNames.join(',');
+}
+
+
+function transfer(){
+	console.log(inputTextarea.value.length);
+	if(inputTextarea.value.length>0){
+
+		// 调用函数并打印结果
+		let result = extractVariableNames(inputTextarea.value);
+		console.log(result);
+		
+		outputTextarea.value =  `REFLECT(${result})`;
+	}else{
+		alert("请先输入数据");
+	}	
+}
+
+
+
+
+
+</script>
+
+</html>
