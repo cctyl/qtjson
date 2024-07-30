@@ -78,6 +78,8 @@ template <>
 int jsonToObj<int>(QJsonValue const &root) {
     if (root.isDouble()) {
         return root.toInt();
+    }else if(root.isString()){
+        return root.toString().toInt();
     }
     qDebug()<<"转换int失败:"<<root;
     return 0; // 返回零
@@ -89,6 +91,9 @@ long jsonToObj<long>(QJsonValue const &root) {
     if (root.isDouble()) {
         return static_cast<long>(root.toInt());
     }
+    else if(root.isString()){
+        return root.toString().toLong();
+    }
     qDebug()<<"转换long失败:"<<root;
     return 0; // 返回零
 }
@@ -98,6 +103,8 @@ template <>
 unsigned short jsonToObj<unsigned short>(QJsonValue const &root) {
     if (root.isDouble()) {
         return static_cast<int>(root.toInt());
+    }else if(root.isString()){
+        return root.toString().toUShort();
     }
     qDebug()<<"转换unsigned short失败:"<<root;
     return 0; // 返回零
@@ -107,6 +114,8 @@ template <>
 short jsonToObj< short>(QJsonValue const &root) {
     if (root.isDouble()) {
         return static_cast<int>(root.toInt());
+    }else if(root.isString()){
+        return root.toString().toShort();
     }
     qDebug()<<"转换short失败:"<<root;
     return 0; // 返回零
