@@ -49,6 +49,8 @@ template <class T, std::enable_if_t<!reflect::has_member<T>() && !special_traits
 T jsonToObj(QJsonValue const &root) {
 
     static_assert(std::is_same<T, T>::value, "Type not supported");
+    qDebug()<<"不支持转换的类型";
+    qDebug()<<root;
     return T(); // 返回默认构造的 T 对象
 }
 // 特化 QString
@@ -59,11 +61,12 @@ QString jsonToObj<QString>(QJsonValue const &root) {
     }
     return QString(); // 返回空字符串
 }
-// 特化 QArray
+// 特化 QJsonArray
 template <>
 QJsonArray jsonToObj<QJsonArray>(QJsonValue const &root) {
     if (root.isArray()) {
-        root.toArray();
+        qDebug()<<"特化QJsonArray:";
+       return root.toArray();
     }
     return QJsonArray(); // 返回空字符串
 }
@@ -115,9 +118,27 @@ template <class T, std::enable_if_t<reflect::has_member<T>(), int> = 0>
 T jsonToObj(QJsonValue const &root) {
     T object;
     reflect::foreach_member(object, [&](const char *key, auto &value) {
+        qDebug()<<"jsonToObj==》 key="<<key;
         value = jsonToObj<std::decay_t<decltype(value)>>(root[key]);
+
     });
     return object;
+}
+
+/**
+ * @brief jsonArrayToVector
+ * @param arr
+ * @return
+ */
+template<class T>
+std::vector<T> jsonArrayToVector(QJsonArray & arr){
+    std::vector<T> v;
+
+    for (const QJsonValue &value : arr) {
+        T t = jsonToObj<T>(value);
+        v.push_back(t);
+    }
+    return v;
 }
 
 
@@ -232,13 +253,16 @@ struct special_traits<std::map<K, V, Alloc>> {
     }
 
     static std::map<K, V, Alloc> jsonToObj(QJsonValue const &root) {
+
         std::map<K, V, Alloc> object;
          QJsonObject  jsonObject = root.toObject();
 
         for (auto it = jsonObject.begin(); it != jsonObject.end(); ++it) {
             const QString &key = it.key();
             const QJsonValue &value = it.value();
-            object[key] = qtjson::jsonToObj<V>(root[key]);
+
+            object[key] = qtjson::jsonToObj<V>(value);
+
 
         }
         return object;
