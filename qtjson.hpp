@@ -22,8 +22,6 @@ struct special_traits {
     static constexpr bool value = false;
 };
 
-
-
 template <class T, std::enable_if_t<!reflect::has_member<T>() && !special_traits<T>::value, int> = 0>
 QJsonValue objToJson(T const &object) {
     return object;
@@ -52,107 +50,6 @@ T jsonToObj(QJsonValue const &root) {
     qDebug()<<"不支持转换的类型:"<<root;
     return T(); // 返回默认构造的 T 对象
 }
-// 特化 QString
-template <>
-QString jsonToObj<QString>(QJsonValue const &root) {
-    if (root.isString()) {
-        return root.toString();
-    }
-    qDebug()<<"转换QString失败:"<<root;
-    return QString(); // 返回空字符串
-}
-// 特化 QJsonArray
-template <>
-QJsonArray jsonToObj<QJsonArray>(QJsonValue const &root) {
-    if (root.isArray()) {
-        qDebug()<<"特化QJsonArray:";
-        return root.toArray();
-    }
-    qDebug()<<"转换QJsonArray失败:"<<root;
-    return QJsonArray(); // 返回空字符串
-}
-
-
-// 特化 int
-template <>
-int jsonToObj<int>(QJsonValue const &root) {
-    if (root.isDouble()) {
-        return root.toInt();
-    }else if(root.isString()){
-        return root.toString().toInt();
-    }
-    qDebug()<<"转换int失败:"<<root;
-    return 0; // 返回零
-}
-
-// 特化 long
-template <>
-long jsonToObj<long>(QJsonValue const &root) {
-    if (root.isDouble()) {
-        return static_cast<long>(root.toInt());
-    }
-    else if(root.isString()){
-        return root.toString().toLong();
-    }
-    qDebug()<<"转换long失败:"<<root;
-    return 0; // 返回零
-}
-
-// 特化 unsigned short
-template <>
-unsigned short jsonToObj<unsigned short>(QJsonValue const &root) {
-    if (root.isDouble()) {
-        return static_cast<int>(root.toInt());
-    }else if(root.isString()){
-        return root.toString().toUShort();
-    }
-    qDebug()<<"转换unsigned short失败:"<<root;
-    return 0; // 返回零
-}
-// 特化 short
-template <>
-short jsonToObj< short>(QJsonValue const &root) {
-    if (root.isDouble()) {
-        return static_cast<int>(root.toInt());
-    }else if(root.isString()){
-        return root.toString().toShort();
-    }
-    qDebug()<<"转换short失败:"<<root;
-    return 0; // 返回零
-}
-
-
-// 特化 bool
-template <>
-bool jsonToObj<bool>(QJsonValue const &root) {
-    if (root.isBool()) {
-        return root.toBool();
-    }
-    qDebug()<<"转换bool失败:"<<root;
-    return false; // 返回 false
-}
-
-// 特化 double
-template <>
-double jsonToObj<double>(QJsonValue const &root) {
-    if (root.isDouble()) {
-        return root.toDouble();
-    }else if(root.isString()){
-        return root.toString().toDouble();
-    }
-    qDebug()<<"转换double失败:"<<root;
-    return 0.0; // 返回零
-}
-// 特化 QJsonObject
-template <>
-QJsonObject jsonToObj<QJsonObject>(QJsonValue const &root) {
-    if (root.isObject()) {
-        return root.toObject();
-    }
-    qDebug()<<"转换QJsonObject失败:"<<root;
-    return QJsonObject(); // 返回空对象
-}
-
 
 
 
@@ -257,6 +154,176 @@ inline QJsonValue strToJson(QString const &jsonString) {
 
 
 // 3.==================自定义特化扩展============================================
+// 特化 QString
+template <>
+struct special_traits<QString> {
+    static constexpr bool value = true;
+    static QString jsonToObj(QJsonValue const &root) {
+        if (root.isString()) {
+            return root.toString();
+        }
+        qDebug()<<"转换QString失败:"<<root;
+        return QString(); // 返回空字符串
+    }
+
+    static QJsonValue objToJson(QString const &object) {
+        return object;
+    }
+
+};
+
+// 特化 QJsonArray
+template <>
+struct special_traits<QJsonArray> {
+    static constexpr bool value = true;
+    static  QJsonArray jsonToObj(QJsonValue const &root) {
+        if (root.isArray()) {
+            qDebug()<<"特化QJsonArray:";
+            return root.toArray();
+        }
+        qDebug()<<"转换QJsonArray失败:"<<root;
+        return QJsonArray(); // 返回空字符串
+    }
+
+
+    static QJsonValue objToJson(QJsonArray const &object) {
+        return object;
+    }
+};
+
+// 特化 int
+template <>
+struct special_traits<int> {
+    static constexpr bool value = true;
+    static int jsonToObj(QJsonValue const &root) {
+        if (root.isDouble()) {
+            return root.toInt();
+        }else if(root.isString()){
+            return root.toString().toInt();
+        }
+        qDebug()<<"转换int失败:"<<root;
+        return 0; // 返回零
+    }
+
+
+    static QJsonValue objToJson(int const &object) {
+        return object;
+    }
+};
+// 特化 long
+template <>
+struct special_traits<long> {
+    static constexpr bool value = true;
+    static long jsonToObj(QJsonValue const &root) {
+        if (root.isDouble()) {
+            return static_cast<long>(root.toInt());
+        }
+        else if(root.isString()){
+            return root.toString().toLong();
+        }
+        qDebug()<<"转换long失败:"<<root;
+        return 0; // 返回零
+    }
+
+
+
+    static QJsonValue objToJson(long const &object) {
+        return QJsonValue(static_cast<double>(object));
+    }
+};
+
+// 特化 unsigned short
+template <>
+struct special_traits<unsigned short> {
+    static constexpr bool value = true;
+    static unsigned short jsonToObj(QJsonValue const &root) {
+        if (root.isDouble()) {
+            return static_cast<int>(root.toInt());
+        }else if(root.isString()){
+            return root.toString().toUShort();
+        }
+        qDebug()<<"转换unsigned short失败:"<<root;
+        return 0; // 返回零
+    }
+
+
+
+    static QJsonValue objToJson(unsigned short const &object) {
+        return object;
+    }
+};
+
+// 特化 short
+template <>
+struct special_traits<short> {
+    static constexpr bool value = true;
+    static short jsonToObj(QJsonValue const &root) {
+        if (root.isDouble()) {
+            return static_cast<int>(root.toInt());
+        }else if(root.isString()){
+            return root.toString().toShort();
+        }
+        qDebug()<<"转换short失败:"<<root;
+        return 0; // 返回零
+    }
+
+    static QJsonValue objToJson( short const &object) {
+        return object;
+    }
+};
+
+// 特化 bool
+template <>
+struct special_traits  <bool>    {
+    static constexpr bool value = true;
+    static bool jsonToObj(QJsonValue const &root) {
+        if (root.isBool()) {
+            return root.toBool();
+        }
+        qDebug()<<"转换bool失败:"<<root;
+        return false; // 返回 false
+    }
+    static QJsonValue objToJson(bool const &object) {
+        return object;
+    }
+};
+
+
+
+// 特化 double
+template <>
+struct special_traits    <double>    {
+    static constexpr bool value = true;
+    static double jsonToObj(QJsonValue const &root) {
+        if (root.isDouble()) {
+            return root.toDouble();
+        }else if(root.isString()){
+            return root.toString().toDouble();
+        }
+        qDebug()<<"转换double失败:"<<root;
+        return 0.0; // 返回零
+    }
+    static QJsonValue objToJson(double const &object) {
+        return object;
+    }
+
+};
+// 特化 QJsonObject
+
+template <>
+struct special_traits     <QJsonObject>   {
+    static constexpr bool value = true;
+    static QJsonObject jsonToObj(QJsonValue const &root) {
+        if (root.isObject()) {
+            return root.toObject();
+        }
+        qDebug()<<"转换QJsonObject失败:"<<root;
+        return QJsonObject(); // 返回空对象
+    }
+    static QJsonValue objToJson(QJsonObject const &object) {
+        return object;
+    }
+};
 
 
 template <class T, class Alloc>
