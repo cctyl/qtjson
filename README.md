@@ -33,11 +33,11 @@ using namespace qtjson; //也可以不声明
 
 
 <p align="center">
-    <img src="./img/auto-register.png" width="480" height="235">
+    <img src="./img/auto-register.png" >
 </p>
 
 <p align="center">
-    <img src="./img/auto-register-show.png" width="480" height="235">
+    <img src="./img/auto-register-show.png" >
 </p>
 
 
