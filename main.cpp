@@ -44,7 +44,7 @@ void testCustom(){
 
 
     //对象转json字符串
-    QString jsonStr =jsonToStr( objToJson(*osInfo));
+    QString jsonStr = serialize(*osInfo);
     /*
         {
             "m_arch": "x86",
@@ -59,7 +59,7 @@ void testCustom(){
     qDebug()<<jsonStr.toUtf8().data();
 
     //json字符串转对象
-    OsInfo o2 =   jsonToObj<OsInfo>(strToJson(jsonStr));
+    OsInfo o2 =  deserialize<OsInfo>(jsonStr);
     qDebug()<< o2.m_platform<<","
              <<o2.m_arch<<","
              <<o2.m_hostname<<","
@@ -68,17 +68,9 @@ void testCustom(){
 
 
 
-    // 创建 QJsonArray
-    QJsonArray jsonArray;
-    jsonArray.append(1);
-    jsonArray.append(2);
-    jsonArray.append(3);
-    QJsonObject jsonObject;
-    jsonObject["numbers"] = jsonArray;
 
 
-
-    qDebug()<< jsonObject["numbers"] ;
+    delete osInfo;
 }
 
 //测试 std::vector
@@ -90,18 +82,19 @@ void testVector(){
     std::vector<int> v= {
         1,2,3,4,5,6,8
     };
-    QString jsonStr = jsonToStr( objToJson(v));
+    QString jsonStr = serialize(v);
     qDebug()<<jsonStr.toUtf8().data();
 
 
     //反序列化
-    std::vector<int> v2=   jsonToObj< std::vector<int>>( strToJson(jsonStr));
+    std::vector<int> v2=   deserialize<std::vector<int>>( jsonStr);
     qDebug()<<"v2.size="<< v2.size();
     for(auto & elem : v2){
         qDebug()<<"反序列化:"<<elem;
     }
     qDebug()<<"反序列化结束";
 }
+
 
 
 void testMap(){
@@ -112,11 +105,11 @@ void testMap(){
         {"zhangsan",20},
         {"lisi",15}
     };
-    QString jsonStr = jsonToStr( objToJson(m));
+    QString jsonStr = serialize(m);
     qDebug()<<jsonStr.toUtf8().data();
 
 
-    std::map<QString,int> m2=   jsonToObj< std::map<QString,int>>( strToJson(jsonStr));
+    std::map<QString,int> m2=deserialize< std::map<QString,int>>( jsonStr);
     qDebug()<<m2.size();
     for (auto p : m2) {
        qDebug()<< "key=" << p.first << ",value=" << p.second;

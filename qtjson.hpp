@@ -246,6 +246,18 @@ struct special_traits<std::map<K, V, Alloc>> {
 };
 
 
+
+template <class T>
+QString serialize(T const &object) {
+    return jsonToStr(objToJson(object));
+}
+
+template <class T>
+T deserialize(QString const &json) {
+    return jsonToObj<T>(strToJson(json));
+}
+
+
 }
 
 #endif // QTJSON_H
