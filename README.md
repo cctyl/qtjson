@@ -75,8 +75,8 @@ void testCustom(){
              <<o.m_uptime;
 
 
-    //3.对象转json字符串
-    QString jsonStr =jsonToStr( objToJson(*osInfo));
+    //对象转json字符串
+    QString jsonStr = serialize(*osInfo);
     /*
         {
             "m_arch": "x86",
@@ -90,8 +90,8 @@ void testCustom(){
 
     qDebug()<<jsonStr.toUtf8().data();
 
-    //4.json字符串转对象
-    OsInfo o2 =   jsonToObj<OsInfo>(strToJson(jsonStr));
+    //json字符串转对象
+    OsInfo o2 =  deserialize<OsInfo>(jsonStr);
     qDebug()<< o2.m_platform<<","
              <<o2.m_arch<<","
              <<o2.m_hostname<<","
@@ -101,6 +101,8 @@ void testCustom(){
 
 
 
+
+    delete osInfo;
 }
 
 ```
