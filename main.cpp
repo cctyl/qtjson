@@ -329,23 +329,54 @@ void testComplex(){
     }
   })";
 
-     DevInfo d =  qtjson::deserialize<DevInfo>(jsonStr);
-     qDebug()<<"";
-     qDebug()<<"=====================";
-     qDebug()<<d.cpuInfo.cpuModel;
+    QJsonObject obj = qtjson::strToJson(jsonStr).toObject();
+    // 获取 "driveInfo" 子对象
+    QJsonValue driveInfoValue = obj.value("driveInfo");
+    if (!driveInfoValue.isNull() && driveInfoValue.isObject()) {
+        QJsonObject driveInfo = driveInfoValue.toObject();
 
-     for(auto & pair :d.netInterface){
-
-       qDebug()<<"map key="<<pair.first;
-       qDebug()<<"map value="<<pair.second;
-
-       std::vector<NetInterfaceInfo> v =  qtjson::jsonArrayToVector<NetInterfaceInfo>(pair.second);
-       qDebug()<<"v.size= "<<v.size();
-       for(NetInterfaceInfo &n :v){
-           qDebug()<<"address="<<n.address;
-
-       }
+        // 从 "driveInfo" 子对象中获取 "usedPercentage"
+        QJsonValue usedPercentageValue = driveInfo.value("usedPercentage");
+        qDebug() <<"usedPercentage type ="<<usedPercentageValue.type();
+        if (!usedPercentageValue.isNull() && usedPercentageValue.isDouble()) {
+            double usedPercentage = usedPercentageValue.toDouble();
+            qDebug() << "usedPercentage:" << usedPercentage;
+        } else {
+            qDebug() << "usedPercentage is not a valid number";
+        }
+    } else {
+        qDebug() << "driveInfo is not a valid object";
     }
+
+
+
+
+    // DevInfo d =  qtjson::deserialize<DevInfo>(jsonStr);
+    // qDebug()<<"";
+    // qDebug()<<"=====================";
+    // qDebug()<<d.cpuInfo.cpuModel;
+
+    // for(auto & pair :d.netInterface){
+
+    //     qDebug()<<"map key="<<pair.first;
+    //     qDebug()<<"map value="<<pair.second;
+
+    //     std::vector<NetInterfaceInfo> v =  qtjson::jsonArrayToVector<NetInterfaceInfo>(pair.second);
+    //     qDebug()<<"v.size= "<<v.size();
+    //     for(NetInterfaceInfo &n :v){
+    //         qDebug()<<"address="<<n.address;
+
+    //     }
+    // }
+
+    // qDebug()<<"driverInfo.usedPercentage="<<d.driveInfo.usedPercentage;
+
+
+    // qDebug()<<"";
+    // qDebug()<<"=========反序列化============";
+    // qDebug()<< qtjson::serialize(d).toUtf8().data();
+
+
 }
 
 

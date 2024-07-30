@@ -49,8 +49,7 @@ template <class T, std::enable_if_t<!reflect::has_member<T>() && !special_traits
 T jsonToObj(QJsonValue const &root) {
 
     static_assert(std::is_same<T, T>::value, "Type not supported");
-    qDebug()<<"不支持转换的类型";
-    qDebug()<<root;
+    qDebug()<<"不支持转换的类型:"<<root;
     return T(); // 返回默认构造的 T 对象
 }
 // 特化 QString
@@ -59,6 +58,7 @@ QString jsonToObj<QString>(QJsonValue const &root) {
     if (root.isString()) {
         return root.toString();
     }
+    qDebug()<<"转换QString失败:"<<root;
     return QString(); // 返回空字符串
 }
 // 特化 QJsonArray
@@ -66,8 +66,9 @@ template <>
 QJsonArray jsonToObj<QJsonArray>(QJsonValue const &root) {
     if (root.isArray()) {
         qDebug()<<"特化QJsonArray:";
-       return root.toArray();
+        return root.toArray();
     }
+    qDebug()<<"转换QJsonArray失败:"<<root;
     return QJsonArray(); // 返回空字符串
 }
 
@@ -76,16 +77,49 @@ QJsonArray jsonToObj<QJsonArray>(QJsonValue const &root) {
 template <>
 int jsonToObj<int>(QJsonValue const &root) {
     if (root.isDouble()) {
-        return static_cast<int>(root.toDouble());
+        return root.toInt();
     }
+    qDebug()<<"转换int失败:"<<root;
     return 0; // 返回零
 }
+
+// 特化 long
+template <>
+long jsonToObj<long>(QJsonValue const &root) {
+    if (root.isDouble()) {
+        return static_cast<long>(root.toInt());
+    }
+    qDebug()<<"转换long失败:"<<root;
+    return 0; // 返回零
+}
+
+// 特化 unsigned short
+template <>
+unsigned short jsonToObj<unsigned short>(QJsonValue const &root) {
+    if (root.isDouble()) {
+        return static_cast<int>(root.toInt());
+    }
+    qDebug()<<"转换unsigned short失败:"<<root;
+    return 0; // 返回零
+}
+// 特化 short
+template <>
+short jsonToObj< short>(QJsonValue const &root) {
+    if (root.isDouble()) {
+        return static_cast<int>(root.toInt());
+    }
+    qDebug()<<"转换short失败:"<<root;
+    return 0; // 返回零
+}
+
+
 // 特化 bool
 template <>
 bool jsonToObj<bool>(QJsonValue const &root) {
     if (root.isBool()) {
         return root.toBool();
     }
+    qDebug()<<"转换bool失败:"<<root;
     return false; // 返回 false
 }
 
@@ -94,7 +128,10 @@ template <>
 double jsonToObj<double>(QJsonValue const &root) {
     if (root.isDouble()) {
         return root.toDouble();
+    }else if(root.isString()){
+        return root.toString().toDouble();
     }
+    qDebug()<<"转换double失败:"<<root;
     return 0.0; // 返回零
 }
 // 特化 QJsonObject
@@ -103,6 +140,7 @@ QJsonObject jsonToObj<QJsonObject>(QJsonValue const &root) {
     if (root.isObject()) {
         return root.toObject();
     }
+    qDebug()<<"转换QJsonObject失败:"<<root;
     return QJsonObject(); // 返回空对象
 }
 
@@ -175,7 +213,6 @@ inline QString jsonToStr(QJsonArray array) {
 }
 inline QString jsonToStr(QJsonValue value) {
     if(value.isObject()){
-
         return jsonToStr(value.toObject());
     }else {
         return jsonToStr(value.toArray());
@@ -255,7 +292,7 @@ struct special_traits<std::map<K, V, Alloc>> {
     static std::map<K, V, Alloc> jsonToObj(QJsonValue const &root) {
 
         std::map<K, V, Alloc> object;
-         QJsonObject  jsonObject = root.toObject();
+        QJsonObject  jsonObject = root.toObject();
 
         for (auto it = jsonObject.begin(); it != jsonObject.end(); ++it) {
             const QString &key = it.key();
