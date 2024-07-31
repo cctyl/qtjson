@@ -23,7 +23,7 @@ let outputTextarea = document.getElementById("outputStr");
 
 function extractVariableNames(str) {
     // 正则表达式用于匹配变量名
-    const regex = /(\w+);/g;
+    const regex = /(\w+)\s*;/g;
     let match;
     let variableNames = [];
 
