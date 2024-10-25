@@ -25,7 +25,7 @@ This library is modified from https://github.com/archibate/reflect-hpp.
 Qt 5.10 or higher
 
 ### Installation
-Since QtAutoSerialization is a header-only library, you just need to include the header files in your project.
+Since qtjson is a header-only library, you just need to include the header files in your project.
 
 ### Adding Header Files to Your Project
 qtjson.hpp

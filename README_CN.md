@@ -30,7 +30,7 @@ using namespace qtjson; //也可以不声明
 ### 自定义类型
 #### 成员注册
 
-可以手动输入，也可以浏览器打开本项目的auto-reflect.html，输入属性名，自动生成注册文本：
+可以手动输入，也可以浏览器打开本项目的auto-reflect-cn.html，输入属性名，自动生成注册文本：
 
 
 <p align="center">
