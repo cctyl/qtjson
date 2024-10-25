@@ -2,52 +2,35 @@
 
 
 
-## Introduction
-【[中文](./README_CN.md) 】
-[qtjson] is a dependency-free, header-only, ready-to-use automatic serialization and deserialization library.
-It is completely based on Qt's own JSON-related objects.
-This library is modified from https://github.com/archibate/reflect-hpp.
+## 简介
+【[english](./README.md) 】
+[qtjson] 是一个无依赖、head-only、开箱即用的自动的序列化和反序列化库。
+完全基于qt自身的json相关对象实现。
 
-## Features
-**Header-Only**: No need to compile or link any additional libraries.
+本库是基于https://github.com/archibate/reflect-hpp 进行修改得到的。
 
-**Dependency-Free**: Only relies on the Qt framework, making it easy to integrate into existing projects.
+## 使用
 
-**Automatic Serialization/Deserialization**: Automatically converts between C++ objects and JSON format with minimal code.
+### 头文件添加到项目中
+qtjson.hpp 以及 reflect.hpp
 
-**Customizable**: Supports custom types and complex data structures.
-
-**Cross-Platform**: Works on all platforms supported by Qt (Windows, macOS, Linux, etc.).
-
-## Getting Started
-
-### Prerequisites
-Qt 5.10 or higher
-
-### Installation
-Since QtAutoSerialization is a header-only library, you just need to include the header files in your project.
-
-### Adding Header Files to Your Project
-qtjson.hpp
-reflect.hpp
-
-
-### Including the Header File
+### 包含头文件
 
 
 ```
 #include"qtjson.hpp"
+
 ```
 
-### Using the Namespace
+### 使用作用域
 ```
-using namespace qtjson; // You can also skip this declaration
+using namespace qtjson; //也可以不声明
 ```
 
-### Custom Types
-#### Member Registration
+### 自定义类型
+#### 成员注册
 
-You can manually input the member registration, or open the auto-reflect.html file in a browser, enter the property names, and auto-generate the registration text:
+可以手动输入，也可以浏览器打开本项目的auto-reflect.html，输入属性名，自动生成注册文本：
 
 
 <p align="center">
@@ -71,7 +54,7 @@ public:
     QString m_arch;
     double  m_uptime;
 	
-	// Member registration
+	//成员注册
     REFLECT(m_type,m_platform,m_release,m_hostname,m_arch,m_uptime);
 };
 
@@ -79,14 +62,14 @@ public:
 
 
 
-#### Serialization and Deserialization
+#### 序列化和反序列化
 
 ```
-//Custom type
+//自定义类型
 void testCustom(){
 
     using namespace qtjson;
-    //1.Convert object to QJsonObject
+    //1.对象转换QJsonObject
     OsInfo * osInfo = new OsInfo();
     osInfo->m_platform ="平台";
     osInfo->m_arch = "x86";
@@ -99,7 +82,7 @@ void testCustom(){
     }
 
 
-    //2.Convert QJsonObject to object
+    //2.QJsonObject 转换对象
     OsInfo o =  jsonToObj<OsInfo>(j1);
     qDebug()<< o.m_platform<<","
              <<o.m_arch<<","
@@ -108,7 +91,7 @@ void testCustom(){
              <<o.m_uptime;
 
 
-    //Convert object to JSON string
+    //对象转json字符串
     QString jsonStr = serialize(*osInfo);
     /*
         {
@@ -123,7 +106,7 @@ void testCustom(){
 
     qDebug()<<jsonStr.toUtf8().data();
 
-    //Convert JSON string to object
+    //json字符串转对象
     OsInfo o2 =  deserialize<OsInfo>(jsonStr);
     qDebug()<< o2.m_platform<<","
              <<o2.m_arch<<","
@@ -142,25 +125,23 @@ void testCustom(){
 
 
 
-## Extending Custom Types
+## 自定义类型的扩展
 
-For non-primitive types such as std::map and std::vector, special handling is required.
-
-### Adding Specialized Types
-At the end of qtjson.hpp, within the qtjson namespace, add the following template class format:
-
+对于非基本类型，例如std::map ,std::vector，需要特化处理。
+### 添加特化类型
+在qtjson.hpp末尾，qtjson作用域下，增加如下格式的模板类：
 ```
 
-template <typename ...SpecializedTypeGenerics>
-struct special_traits<SpecializedType> {
+template <特化类型所使用的的泛型>
+struct special_traits<特化类型> {
     static constexpr bool value = true;
 
-    static QJsonValue objToJson(SpecializedType const &object) {
-       // This function should return a QJsonValue
+    static QJsonValue objToJson(特化类型 const &object) {
+        // 此函数中返回一个QJsonValue
     }
 
-    static SpecializedType jsonToObj(QJsonValue const &root) {
-       // This function should convert QJsonValue to SpecializedType
+    static 特化类型 jsonToObj(QJsonValue const &root) {
+       //此函数中，将QJsonValue 转换为  特化类型 即可
     }
 };
 
@@ -168,7 +149,7 @@ struct special_traits<SpecializedType> {
 ```
 
 
-### Examples
+### 示例
 ```
 
 //1.std::vector
